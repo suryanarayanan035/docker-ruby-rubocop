@@ -10,6 +10,8 @@ export interface RubocopConfig {
   configFilePath: string;
   useBundler: boolean;
   suppressRubocopWarnings: boolean;
+  useDocker?: boolean;
+  dockerContainer?: string;
 }
 
 const detectBundledRubocop: () => boolean = () => {
@@ -45,15 +47,24 @@ const autodetectExecutePath: (cmd: string) => string = (cmd) => {
  */
 export const getConfig: () => RubocopConfig = () => {
   const win32 = process.platform === 'win32';
-  const cmd = win32 ? 'rubocop.bat' : 'rubocop';
-  const conf = vs.workspace.getConfiguration('ruby.rubocop');
+  const conf = vs.workspace.getConfiguration('docker-ruby.rubocop');
+  const useDocker = conf.get('useDocker', false);
+  const dockerContainer = conf.get('dockerContainer', '');
+  let cmd;
+  if(useDocker && dockerContainer) {
+    cmd = `docker exec ${dockerContainer} rubocop`
+  }
+  else {
+    cmd = win32 ? 'rubocop.bat' : 'rubocop';
+  }
   let useBundler = conf.get('useBundler', false);
   const configPath = conf.get('executePath', '');
   const suppressRubocopWarnings = conf.get('suppressRubocopWarnings', false);
   let command: string;
-
   // if executePath is present in workspace config, use it.
-  if (configPath.length !== 0) {
+  if(useDocker) {
+    command = cmd
+  } else if (configPath.length !== 0) {
     command = configPath + cmd;
   } else if (useBundler || detectBundledRubocop()) {
     useBundler = true;
@@ -62,18 +73,18 @@ export const getConfig: () => RubocopConfig = () => {
     const detectedPath = autodetectExecutePath(cmd);
     if (0 === detectedPath.length) {
       vs.window.showWarningMessage(
-        'execute path is empty! please check ruby.rubocop.executePath'
+        'execute path is empty! please check docker-ruby.rubocop.executePath'
       );
     }
     command = detectedPath + cmd;
   }
-
   return {
     command,
     configFilePath: conf.get('configFilePath', ''),
     onSave: conf.get('onSave', true),
-    useBundler,
+    useBundler: false,
     suppressRubocopWarnings,
+    useDocker,
   };
 };
 
