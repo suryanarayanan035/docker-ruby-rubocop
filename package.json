@@ -7,7 +7,6 @@
   "engines": {
     "vscode": "^1.62.0"
   },
-  "icon": "images/rubocop.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/suryanarayanan035/docker-ruby-rubocop.git"
