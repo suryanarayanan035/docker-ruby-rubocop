@@ -51,10 +51,9 @@ export const getConfig: () => RubocopConfig = () => {
   const useDocker = conf.get('useDocker', false);
   const dockerContainer = conf.get('dockerContainer', '');
   let cmd;
-  if(useDocker && dockerContainer) {
-    cmd = `docker exec ${dockerContainer} rubocop`
-  }
-  else {
+  if (useDocker && dockerContainer) {
+    cmd = `docker exec ${dockerContainer} rubocop`;
+  } else {
     cmd = win32 ? 'rubocop.bat' : 'rubocop';
   }
   let useBundler = conf.get('useBundler', false);
@@ -62,8 +61,8 @@ export const getConfig: () => RubocopConfig = () => {
   const suppressRubocopWarnings = conf.get('suppressRubocopWarnings', false);
   let command: string;
   // if executePath is present in workspace config, use it.
-  if(useDocker) {
-    command = cmd
+  if (useDocker) {
+    command = cmd;
   } else if (configPath.length !== 0) {
     command = configPath + cmd;
   } else if (useBundler || detectBundledRubocop()) {

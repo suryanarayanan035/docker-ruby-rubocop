@@ -85,7 +85,7 @@ function getCurrentPath(fileUri: vscode.Uri): string {
 
 // extract argument to an array
 function getCommandArguments(fileName: string): string[] {
-  let commandArguments = [fileName, '--force-exclusion', ];
+  let commandArguments = [fileName, '--force-exclusion'];
   const extensionConfig = getConfig();
   if (extensionConfig.configFilePath !== '') {
     // let found = [extensionConfig.configFilePath]
@@ -95,7 +95,7 @@ function getCommandArguments(fileName: string): string[] {
     //     )
     //   )
     //   .filter((p: string) => fs.existsSync(p));
-      const found = ['.rubocop.yml']
+    const found = ['.rubocop.yml'];
 
     if (found.length == 0) {
       vscode.window.showWarningMessage(
@@ -140,7 +140,9 @@ export class Rubocop {
       return;
     }
 
-    const fileName = document.fileName.replace(vscode.workspace.workspaceFolders[0].uri.path,'').substring(1);
+    const fileName = document.fileName
+      .replace(vscode.workspace.workspaceFolders[0].uri.path, '')
+      .substring(1);
     const uri = document.uri;
     const currentPath = getCurrentPath(uri);
 
@@ -196,7 +198,7 @@ export class Rubocop {
           }
         }
       );
-      return () => ('kill' in process) &&  process.kill();
+      return () => 'kill' in process && process.kill();
     });
     this.taskQueue.enqueue(task);
   }
@@ -219,13 +221,19 @@ export class Rubocop {
     fileContents: string,
     options: cp.ExecOptions,
     cb: (err: Error, stdout: string, stderr: string) => void
-  ): cp.ChildProcess| cp.SpawnSyncReturns<Buffer> {
+  ): cp.ChildProcess | cp.SpawnSyncReturns<Buffer> {
     let child: cp.ChildProcess | cp.SpawnSyncReturns<Buffer>;
-    if(this.config.useDocker) {
+    if (this.config.useDocker) {
       // child = cp.exec(`${this.config.command} ${args.join(' ')}`, options, cb);
       // console.log('dsds')
 
-      child = cp.spawnSync('docker',`${this.config.command.replace('docker ','')} ${args.join(' ')}`.split(' '),{maxBuffer: 1073741824});
+      child = cp.spawnSync(
+        'docker',
+        `${this.config.command.replace('docker ', '')} ${args.join(' ')}`.split(
+          ' '
+        ),
+        { maxBuffer: 1073741824 }
+      );
       // child.stderr.on('data',(error) => {
       // console.log('err occured')
       // const exception = new Error();
@@ -238,24 +246,23 @@ export class Rubocop {
       // exception['code'] = child.exitCode
       // cb(exception,data.toString(),'')
       // })
-      cb(child.error,child.stdout.toString(),child.stderr.toString())
+      cb(child.error, child.stdout.toString(), child.stderr.toString());
     } else if (this.config.useBundler) {
       child = cp.exec(`${this.config.command} ${args.join(' ')}`, options, cb);
     } else {
       child = cp.execFile(this.config.command, args, options, cb);
     }
-    if('stdin' in child){
+    if ('stdin' in child) {
       child.stdin.write(fileContents);
       child.stdin.end();
     }
     return child;
   }
 
-  private executeSpawnRubocop(
-    args: string[],
-    fileContents: string,
-  ) {
-    const child = cp.spawnSync(`${this.config.command} ${args.join(' ')}`,{stdio: 'inherit'})
+  private executeSpawnRubocop(args: string[], fileContents: string) {
+    const child = cp.spawnSync(`${this.config.command} ${args.join(' ')}`, {
+      stdio: 'inherit',
+    });
   }
 
   // parse rubocop(JSON) output
