@@ -1,5 +1,5 @@
 {
-  "name": "ruby-rubocop",
+  "name": "docker-ruby-rubocop",
   "version": "0.1.0",
   "publisher": "s035",
   "displayName": "docker-ruby-rubocop",
