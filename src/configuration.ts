@@ -53,7 +53,7 @@ export const getConfig: () => RubocopConfig = () => {
   const dockerContainer = conf.get('dockerContainer', '');
   let cmd;
   if (useDocker && dockerContainer) {
-    cmd = `docker exec ${dockerContainer} rubocop`;
+    cmd = `docker exec -i ${dockerContainer} rubocop`;
   } else {
     cmd = win32 ? 'rubocop.bat' : 'rubocop';
   }
