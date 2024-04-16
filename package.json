@@ -1,6 +1,6 @@
 {
   "name": "docker-ruby-rubocop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "s035",
   "displayName": "docker-ruby-rubocop",
   "description": "execute rubocop for current Ruby code.",
