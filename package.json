@@ -99,6 +99,11 @@
           "type": "string",
           "default": "",
           "description": "Name of the docker container to use the interpretr from"
+        },
+        "docker-ruby.rubocop.disableEmptyFileCop": {
+          "type": "boolean",
+          "default": false,
+          "description": "should Lint/EmptyFile Cop should run?"
         }
       }
     }

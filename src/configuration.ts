@@ -12,6 +12,7 @@ export interface RubocopConfig {
   suppressRubocopWarnings: boolean;
   useDocker?: boolean;
   dockerContainer?: string;
+  disableEmptyFileCop: boolean;
 }
 
 const detectBundledRubocop: () => boolean = () => {
@@ -84,6 +85,7 @@ export const getConfig: () => RubocopConfig = () => {
     useBundler: false,
     suppressRubocopWarnings,
     useDocker,
+    disableEmptyFileCop: conf.get('disableEmptyFileCop', false)
   };
 };
 

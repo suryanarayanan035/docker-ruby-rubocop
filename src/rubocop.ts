@@ -85,18 +85,10 @@ function getCurrentPath(fileUri: vscode.Uri): string {
 
 // extract argument to an array
 function getCommandArguments(fileName: string): string[] {
-  let commandArguments = [fileName, '--force-exclusion'];
+  let commandArguments = ['--stdin',fileName,'--force-exclusion'];
   const extensionConfig = getConfig();
   if (extensionConfig.configFilePath !== '') {
-    // let found = [extensionConfig.configFilePath]
-    //   .concat(
-    //     (vscode.workspace.workspaceFolders || []).map((ws) =>
-    //       path.join(ws.uri.path, extensionConfig.configFilePath)
-    //     )
-    //   )
-    //   .filter((p: string) => fs.existsSync(p));
-    const found = ['.rubocop.yml'];
-
+    const found = [extensionConfig.configFilePath]
     if (found.length == 0) {
       vscode.window.showWarningMessage(
         `${extensionConfig.configFilePath} file does not exist. Ignoring...`
@@ -111,7 +103,9 @@ function getCommandArguments(fileName: string): string[] {
       commandArguments = commandArguments.concat(config);
     }
   }
-
+  if(extensionConfig.disableEmptyFileCop) {
+    commandArguments = commandArguments.concat('--except', 'Lint/EmptyFile')
+  }
   return commandArguments;
 }
 
@@ -140,9 +134,7 @@ export class Rubocop {
       return;
     }
 
-    const fileName = document.fileName
-      .replace(vscode.workspace.workspaceFolders[0].uri.path, '')
-      .substring(1);
+    const fileName = document.fileName;
     const uri = document.uri;
     const currentPath = getCurrentPath(uri);
 
@@ -232,20 +224,8 @@ export class Rubocop {
         `${this.config.command.replace('docker ', '')} ${args.join(' ')}`.split(
           ' '
         ),
-        { maxBuffer: 1073741824 }
+        { maxBuffer: 1073741824, input: fileContents }
       );
-      // child.stderr.on('data',(error) => {
-      // console.log('err occured')
-      // const exception = new Error();
-      // exception['code'] = child.exitCode
-      // cb(exception,null,error.toString())
-      // })
-      // child.stdout.on('data',(data) => {
-      // console.log('data occured')
-      // const exception = new Error();
-      // exception['code'] = child.exitCode
-      // cb(exception,data.toString(),'')
-      // })
       cb(child.error, child.stdout.toString(), child.stderr.toString());
     } else if (this.config.useBundler) {
       child = cp.exec(`${this.config.command} ${args.join(' ')}`, options, cb);
