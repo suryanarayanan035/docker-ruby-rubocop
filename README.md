@@ -1,7 +1,7 @@
 # Docker-Ruby-Rubocop
 ### Liniting as per your convenience 
 
-Docker-Rubocop is a VSCode etension that lets you lint ruby files using rubocop on system and rubocop running inside docker containers.
+Docker-Ruby-Rubocop is a VSCode etension that lets you lint ruby files using rubocop on system and rubocop running inside docker containers.
 
 ## Features
 ___
