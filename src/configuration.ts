@@ -15,15 +15,6 @@ export interface RubocopConfig {
   disableEmptyFileCop: boolean;
 }
 
-const detectBundledRubocop: () => boolean = () => {
-  try {
-    cp.execSync('bundle show rubocop', { cwd: vs.workspace.rootPath });
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
 const autodetectExecutePath: (cmd: string) => string = (cmd) => {
   const key = 'PATH';
   const paths = process.env[key];
