@@ -48,17 +48,17 @@ export const getConfig: () => RubocopConfig = () => {
   } else {
     cmd = win32 ? 'rubocop.bat' : 'rubocop';
   }
-  let useBundler = conf.get('useBundler', false);
-  const configPath = conf.get('executePath', '');
+  const useBundler = conf.get('useBundler', false);
+  const executePath = conf.get('executePath', '');
   const suppressRubocopWarnings = conf.get('suppressRubocopWarnings', false);
   let command: string;
   // if executePath is present in workspace config, use it.
   if (useDocker) {
     command = cmd;
-  } else if (configPath.length !== 0) {
-    command = configPath + cmd;
-  } else if (useBundler || detectBundledRubocop()) {
-    useBundler = true;
+    if (useBundler) command = cmd.replace(' rubocop', ' bundle exec rubocop'); // execute bundle rubocop inside docker
+  } else if (executePath.length !== 0) {
+    command = `${executePath}/${cmd}`
+  } else if (useBundler) {
     command = `bundle exec ${cmd}`;
   } else {
     const detectedPath = autodetectExecutePath(cmd);
@@ -73,9 +73,10 @@ export const getConfig: () => RubocopConfig = () => {
     command,
     configFilePath: conf.get('configFilePath', ''),
     onSave: conf.get('onSave', true),
-    useBundler: false,
+    useBundler: useBundler,
     suppressRubocopWarnings,
     useDocker,
+    dockerContainer: conf.get('dockerContainer',''),
     disableEmptyFileCop: conf.get('disableEmptyFileCop', false)
   };
 };
