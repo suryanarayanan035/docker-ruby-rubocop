@@ -88,19 +88,18 @@ function getCommandArguments(fileName: string): string[] {
   let commandArguments = ['--stdin',fileName,'--force-exclusion'];
   const extensionConfig = getConfig();
   if (extensionConfig.configFilePath !== '') {
-    const found = [extensionConfig.configFilePath]
-    if (found.length == 0) {
+    const prefix_command = extensionConfig.useDocker ? `exec ${extensionConfig.dockerContainer}` : '';
+    let fileExistenceTest;
+    if(extensionConfig.useDocker) {
+      fileExistenceTest = cp.spawnSync('docker',`${prefix_command} test -f ${extensionConfig.configFilePath} && echo 'exists'`.split(' '), {shell: true})
+    }
+    else {
+      fileExistenceTest = cp.spawnSync('test', `-f ${extensionConfig.configFilePath} && echo 'exists'`.split(' '), { shell:true })
+    }
+    if(!fileExistenceTest.stdout?.toString().includes('exists')) {
       vscode.window.showWarningMessage(
-        `${extensionConfig.configFilePath} file does not exist. Ignoring...`
+        `${extensionConfig.configFilePath} file does not exist. Rubocop will run with default config`
       );
-    } else {
-      if (found.length > 1) {
-        vscode.window.showWarningMessage(
-          `Found multiple files (${found}) will use ${found[0]}`
-        );
-      }
-      const config = ['--config', found[0]];
-      commandArguments = commandArguments.concat(config);
     }
   }
   if(extensionConfig.disableEmptyFileCop) {
