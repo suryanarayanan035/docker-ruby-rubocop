@@ -1,12 +1,13 @@
 {
   "name": "docker-ruby-rubocop",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "publisher": "s035",
   "displayName": "docker-ruby-rubocop",
-  "description": "execute rubocop for current Ruby code.",
+  "description": "Lint Rubycode use your local eubocop and rubocop on docker",
   "engines": {
     "vscode": "^1.62.0"
   },
+  "icon": "images/logo.jpg",
   "repository": {
     "type": "git",
     "url": "https://github.com/suryanarayanan035/docker-ruby-rubocop.git"
