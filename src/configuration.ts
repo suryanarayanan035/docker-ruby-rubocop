@@ -52,7 +52,6 @@ export const getConfig: () => RubocopConfig = () => {
   const executePath = conf.get('executePath', '');
   const suppressRubocopWarnings = conf.get('suppressRubocopWarnings', false);
   let command: string;
-  // if executePath is present in workspace config, use it.
   if (useDocker) {
     command = cmd;
     if (useBundler) command = cmd.replace(' rubocop', ' bundle exec rubocop'); // execute bundle rubocop inside docker
