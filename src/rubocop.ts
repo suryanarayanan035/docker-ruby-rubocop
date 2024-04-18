@@ -135,7 +135,6 @@ export class Rubocop {
 
     const fileName = document.fileName;
     const uri = document.uri;
-    const currentPath = getCurrentPath(uri);
 
     const onDidExec = (error: Error, stdout: string, stderr: string) => {
       this.reportError(error, stderr);
@@ -174,10 +173,10 @@ export class Rubocop {
       .concat(jsonOutputFormat);
 
     const task = new Task(uri, (token) => {
-      const process = this.executeRubocop(
+      this.executeRubocop(
         args,
+        getCurrentPath(uri),
         document.getText(),
-        { cwd: currentPath },
         (error, stdout, stderr) => {
           if (token.isCanceled) {
             return;
@@ -189,7 +188,7 @@ export class Rubocop {
           }
         }
       );
-      return () => 'kill' in process && process.kill();
+      return () => console.log('call canceled');
     });
     this.taskQueue.enqueue(task);
   }
@@ -209,39 +208,27 @@ export class Rubocop {
   // execute rubocop
   private executeRubocop(
     args: string[],
+    cwd: string,
     fileContents: string,
-    options: cp.ExecOptions,
     cb: (err: Error, stdout: string, stderr: string) => void
-  ): cp.ChildProcess | cp.SpawnSyncReturns<Buffer> {
-    let child: cp.ChildProcess | cp.SpawnSyncReturns<Buffer>;
-    if (this.config.useDocker) {
-      // child = cp.exec(`${this.config.command} ${args.join(' ')}`, options, cb);
-      // console.log('dsds')
-
-      child = cp.spawnSync(
-        'docker',
-        `${this.config.command.replace('docker ', '')} ${args.join(' ')}`.split(
-          ' '
-        ),
-        { maxBuffer: 1073741824, input: fileContents }
-      );
-      cb(child.error, child.stdout.toString(), child.stderr.toString());
-    } else if (this.config.useBundler) {
-      child = cp.exec(`${this.config.command} ${args.join(' ')}`, options, cb);
-    } else {
-      child = cp.execFile(this.config.command, args, options, cb);
+  ): void {
+    const options = {maxBuffer: 1073741824, input: fileContents}  // 1073741824 bytes = 1 Megabyte
+    let command, spawnArgs;
+    if(this.config.useDocker) {
+      command = 'docker'
+      spawnArgs = this.config.command.replace('docker ', '').split(' ').concat(args)
     }
-    if ('stdin' in child) {
-      child.stdin.write(fileContents);
-      child.stdin.end();
+    else if(this.config.useBundler) {
+      command = 'bundle';
+      spawnArgs = this.config.command.replace('bundle ', '').split(' ').concat(args)
+      options['cwd'] = cwd
     }
-    return child;
-  }
-
-  private executeSpawnRubocop(args: string[], fileContents: string) {
-    const child = cp.spawnSync(`${this.config.command} ${args.join(' ')}`, {
-      stdio: 'inherit',
-    });
+    else {
+      command = this.config.command;
+      spawnArgs = args;
+    }
+    const child = cp.spawnSync(command, spawnArgs, options);
+    cb(child.error,child.stdout?.toString(),child.stderr?.toString())
   }
 
   // parse rubocop(JSON) output
